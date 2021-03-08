@@ -20,9 +20,7 @@ jobs:
         run: go fmt .
 
       - name: Lint
-        run: |
-          go get -u golang.org/x/lint/golint
-          golint -set_exit_status ./...
+        uses: golangci/golangci-lint-action@v2
 
       - name: Errcheck
         run: |
