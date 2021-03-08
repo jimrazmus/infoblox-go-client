@@ -13,11 +13,14 @@ const (
 	freeLockVal string = "Available"
 )
 
+// Lock is the interface implemented by clients needing serialized access to
+// a network view
 type Lock interface {
 	Lock() error
 	UnLock(force bool) error
 }
 
+// NetworkViewLock contains lock data
 type NetworkViewLock struct {
 	Name          string
 	ObjMgr        *ObjectManager
@@ -29,7 +32,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 
 	req := NewMultiRequest(
 		[]*RequestBody{
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "networkview",
 				Data: map[string]interface{}{
@@ -44,7 +47,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 				},
 				Discard: true,
 			},
-			&RequestBody{
+			{
 				Method: "PUT",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Data: map[string]interface{}{
@@ -60,7 +63,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Args: map[string]string{
@@ -72,7 +75,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "STATE:DISPLAY",
 			},
 		},
@@ -90,7 +93,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 
 	req := NewMultiRequest(
 		[]*RequestBody{
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "networkview",
 				Data:   getData,
@@ -102,7 +105,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				},
 				Discard: true,
 			},
-			&RequestBody{
+			{
 				Method: "PUT",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Data: map[string]interface{}{
@@ -115,7 +118,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "PUT",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Data: map[string]interface{}{
@@ -126,7 +129,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Args: map[string]string{
@@ -138,7 +141,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "STATE:DISPLAY",
 			},
 		},
@@ -165,8 +168,8 @@ func (l *NetworkViewLock) getLock() bool {
 		if t, ok := nw.Ea[l.LockTimeoutEA]; ok {
 			if int32(time.Now().Unix())-int32(t.(int)) > timeout {
 				logrus.Debugln("Lock is timed out. Forcefully acquiring it.")
-				//remove the lock forcefully and acquire it
-				l.UnLock(true)
+				//remove the lock forcefully, ignoring errors, and acquire it
+				_ = l.UnLock(true)
 				// try to get lock again
 				return l.getLock()
 			}
@@ -183,6 +186,8 @@ func (l *NetworkViewLock) getLock() bool {
 	return false
 }
 
+// Lock attempts to lock on a network view. Lock will retry up to 10 times with
+// a random delay, between 1 and 10 seconds, between each attempt.
 func (l *NetworkViewLock) Lock() error {
 
 	// verify if network view exists and has EA for the lock
@@ -204,7 +209,7 @@ func (l *NetworkViewLock) Lock() error {
 	for {
 		// Get lock on the network view
 		lock := l.getLock()
-		if lock == true {
+		if lock {
 			// Got the lock.
 			logrus.Debugf("Got the lock on Network View %s\n", l.Name)
 			return nil
@@ -223,6 +228,7 @@ func (l *NetworkViewLock) Lock() error {
 	}
 }
 
+// UnLock attempts to release a lock on a network view.
 func (l *NetworkViewLock) UnLock(force bool) error {
 	// To unlock set the Docker-Plugin-Lock EA of network view to Available and
 	// remove the Docker-Plugin-Lock-Time EA

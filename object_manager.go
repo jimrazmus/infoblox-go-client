@@ -7,6 +7,7 @@ import (
 	"regexp"
 )
 
+// IBObjectManager defines the what???
 type IBObjectManager interface {
 	AllocateIP(netview string, cidr string, ipAddr string, macAddress string, name string, ea EA) (*FixedAddress, error)
 	AllocateNetwork(netview string, cidr string, prefixLen uint, name string) (network *Network, err error)
@@ -21,7 +22,7 @@ type IBObjectManager interface {
 	CreateNetworkView(name string) (*NetworkView, error)
 	CreatePTRRecord(netview string, dnsview string, recordname string, cidr string, ipAddr string, ea EA) (*RecordPTR, error)
 	DeleteARecord(ref string) (string, error)
-	DeleteZoneAuth(ref string) (string, error) 
+	DeleteZoneAuth(ref string) (string, error)
 	DeleteCNAMERecord(ref string) (string, error)
 	DeleteFixedAddress(ref string) (string, error)
 	DeleteHostRecord(ref string) (string, error)
@@ -47,6 +48,7 @@ type IBObjectManager interface {
 	UpdateNetworkViewEA(ref string, addEA EA, removeEA EA) error
 }
 
+// ObjectManager what?
 type ObjectManager struct {
 	connector IBConnector
 	cmpType   string
@@ -55,6 +57,7 @@ type ObjectManager struct {
 	OmitCloudAttrs bool
 }
 
+// NewObjectManager returns an ObjectManager configured with ...
 func NewObjectManager(connector IBConnector, cmpType string, tenantID string) *ObjectManager {
 	objMgr := new(ObjectManager)
 
@@ -83,6 +86,7 @@ func (objMgr *ObjectManager) extendEA(ea EA) EA {
 	return eas
 }
 
+// CreateNetworkView https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateNetworkView(name string) (*NetworkView, error) {
 	networkView := NewNetworkView(NetworkView{
 		Name: name,
@@ -110,6 +114,7 @@ func (objMgr *ObjectManager) makeNetworkView(netviewName string) (netviewRef str
 	return
 }
 
+// CreateDefaultNetviews https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateDefaultNetviews(globalNetview string, localNetview string) (globalNetviewRef string, localNetviewRef string, err error) {
 	if globalNetviewRef, err = objMgr.makeNetworkView(globalNetview); err != nil {
 		return
@@ -122,6 +127,7 @@ func (objMgr *ObjectManager) CreateDefaultNetviews(globalNetview string, localNe
 	return
 }
 
+// CreateNetwork https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateNetwork(netview string, cidr string, name string) (*Network, error) {
 	network := NewNetwork(Network{
 		NetviewName: netview,
@@ -140,6 +146,7 @@ func (objMgr *ObjectManager) CreateNetwork(netview string, cidr string, name str
 	return network, err
 }
 
+// CreateNetworkContainer https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateNetworkContainer(netview string, cidr string) (*NetworkContainer, error) {
 	container := NewNetworkContainer(NetworkContainer{
 		NetviewName: netview,
@@ -152,6 +159,7 @@ func (objMgr *ObjectManager) CreateNetworkContainer(netview string, cidr string)
 	return container, err
 }
 
+// GetNetworkView https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetNetworkView(name string) (*NetworkView, error) {
 	var res []NetworkView
 
@@ -166,6 +174,7 @@ func (objMgr *ObjectManager) GetNetworkView(name string) (*NetworkView, error) {
 	return &res[0], nil
 }
 
+// UpdateNetworkViewEA https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) UpdateNetworkViewEA(ref string, addEA EA, removeEA EA) error {
 	var res NetworkView
 
@@ -192,6 +201,7 @@ func (objMgr *ObjectManager) UpdateNetworkViewEA(ref string, addEA EA, removeEA 
 	return err
 }
 
+// BuildNetworkViewFromRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func BuildNetworkViewFromRef(ref string) *NetworkView {
 	// networkview/ZG5zLm5ldHdvcmtfdmlldyQyMw:global_view/false
 	r := regexp.MustCompile(`networkview/\w+:([^/]+)/\w+`)
@@ -207,6 +217,7 @@ func BuildNetworkViewFromRef(ref string) *NetworkView {
 	}
 }
 
+// BuildNetworkFromRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func BuildNetworkFromRef(ref string) *Network {
 	// network/ZG5zLm5ldHdvcmskODkuMC4wLjAvMjQvMjU:89.0.0.0/24/global_view
 	r := regexp.MustCompile(`network/\w+:(\d+\.\d+\.\d+\.\d+/\d+)/(.+)`)
@@ -223,6 +234,7 @@ func BuildNetworkFromRef(ref string) *Network {
 	}
 }
 
+// GetNetwork https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetNetwork(netview string, cidr string, ea EA) (*Network, error) {
 	var res []Network
 
@@ -246,12 +258,14 @@ func (objMgr *ObjectManager) GetNetwork(netview string, cidr string, ea EA) (*Ne
 	return &res[0], nil
 }
 
+// GetNetworkwithref https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetNetworkwithref(ref string) (*Network, error) {
 	network := NewNetwork(Network{})
 	err := objMgr.connector.GetObject(network, ref, &network)
 	return network, err
 }
 
+// GetNetworkContainer https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetNetworkContainer(netview string, cidr string) (*NetworkContainer, error) {
 	var res []NetworkContainer
 
@@ -268,6 +282,7 @@ func (objMgr *ObjectManager) GetNetworkContainer(netview string, cidr string) (*
 	return &res[0], nil
 }
 
+// GetIPAddressFromRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func GetIPAddressFromRef(ref string) string {
 	// fixedaddress/ZG5zLmJpbmRfY25h:12.0.10.1/external
 	r := regexp.MustCompile(`fixedaddress/\w+:(\d+\.\d+\.\d+\.\d+)/.+`)
@@ -279,9 +294,10 @@ func GetIPAddressFromRef(ref string) string {
 	return ""
 }
 
+// AllocateIP https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) AllocateIP(netview string, cidr string, ipAddr string, macAddress string, name string, ea EA) (*FixedAddress, error) {
 	if len(macAddress) == 0 {
-		macAddress = MACADDR_ZERO
+		macAddress = "00:00:00:00:00:00"
 	}
 
 	eas := objMgr.extendEA(ea)
@@ -306,6 +322,7 @@ func (objMgr *ObjectManager) AllocateIP(netview string, cidr string, ipAddr stri
 	return fixedAddr, err
 }
 
+// AllocateNetwork https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) AllocateNetwork(netview string, cidr string, prefixLen uint, name string) (network *Network, err error) {
 	network = nil
 
@@ -325,6 +342,7 @@ func (objMgr *ObjectManager) AllocateNetwork(netview string, cidr string, prefix
 	return
 }
 
+// GetFixedAddress https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetFixedAddress(netview string, cidr string, ipAddr string, macAddr string) (*FixedAddress, error) {
 	var res []FixedAddress
 
@@ -346,21 +364,23 @@ func (objMgr *ObjectManager) GetFixedAddress(netview string, cidr string, ipAddr
 	return &res[0], nil
 }
 
+// GetFixedAddressByRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetFixedAddressByRef(ref string) (*FixedAddress, error) {
 	fixedAddr := NewFixedAddress(FixedAddress{})
 	err := objMgr.connector.GetObject(fixedAddr, ref, &fixedAddr)
 	return fixedAddr, err
 }
 
+// DeleteFixedAddress https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeleteFixedAddress(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
 
 // validation  for match_client
 func validateMatchClient(value string) bool {
-	match_client := [5]string{"MAC_ADDRESS", "CLIENT_ID", "RESERVED", "CIRCUIT_ID", "REMOTE_ID"}
+	matchClient := [5]string{"MAC_ADDRESS", "CLIENT_ID", "RESERVED", "CIRCUIT_ID", "REMOTE_ID"}
 
-	for _, val := range match_client {
+	for _, val := range matchClient {
 		if val == value {
 			return true
 		}
@@ -368,6 +388,7 @@ func validateMatchClient(value string) bool {
 	return false
 }
 
+// UpdateFixedAddress https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) UpdateFixedAddress(fixedAddrRef string, matchClient string, macAddress string, vmID string, vmName string) (*FixedAddress, error) {
 	updateFixedAddr := NewFixedAddress(FixedAddress{Ref: fixedAddrRef})
 
@@ -397,6 +418,7 @@ func (objMgr *ObjectManager) UpdateFixedAddress(fixedAddrRef string, matchClient
 	return updateFixedAddr, err
 }
 
+// ReleaseIP https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) ReleaseIP(netview string, cidr string, ipAddr string, macAddr string) (string, error) {
 	fixAddress, _ := objMgr.GetFixedAddress(netview, cidr, ipAddr, macAddr)
 	if fixAddress == nil {
@@ -405,6 +427,7 @@ func (objMgr *ObjectManager) ReleaseIP(netview string, cidr string, ipAddr strin
 	return objMgr.connector.DeleteObject(fixAddress.Ref)
 }
 
+// DeleteNetwork https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeleteNetwork(ref string, netview string) (string, error) {
 	network := BuildNetworkFromRef(ref)
 	if network != nil && network.NetviewName == netview {
@@ -414,10 +437,12 @@ func (objMgr *ObjectManager) DeleteNetwork(ref string, netview string) (string, 
 	return "", nil
 }
 
+// DeleteNetworkView https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeleteNetworkView(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
 
+// GetEADefinition https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetEADefinition(name string) (*EADefinition, error) {
 	var res []EADefinition
 
@@ -432,6 +457,7 @@ func (objMgr *ObjectManager) GetEADefinition(name string) (*EADefinition, error)
 	return &res[0], nil
 }
 
+// CreateEADefinition https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateEADefinition(eadef EADefinition) (*EADefinition, error) {
 	newEadef := NewEADefinition(eadef)
 
@@ -441,26 +467,27 @@ func (objMgr *ObjectManager) CreateEADefinition(eadef EADefinition) (*EADefiniti
 	return newEadef, err
 }
 
+// CreateHostRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateHostRecord(enabledns bool, recordName string, netview string, dnsview string, cidr string, ipAddr string, macAddress string, ea EA) (*HostRecord, error) {
 
 	eas := objMgr.extendEA(ea)
 
-	recordHostIpAddr := NewHostRecordIpv4Addr(HostRecordIpv4Addr{Mac: macAddress})
+	recordHostIPAddr := NewHostRecordIpv4Addr(HostRecordIpv4Addr{Mac: macAddress})
 
 	if ipAddr == "" {
-		recordHostIpAddr.Ipv4Addr = fmt.Sprintf("func:nextavailableip:%s,%s", cidr, netview)
+		recordHostIPAddr.Ipv4Addr = fmt.Sprintf("func:nextavailableip:%s,%s", cidr, netview)
 	} else {
-		recordHostIpAddr.Ipv4Addr = ipAddr
+		recordHostIPAddr.Ipv4Addr = ipAddr
 	}
 	enableDNS := new(bool)
 	*enableDNS = enabledns
-	recordHostIpAddrSlice := []HostRecordIpv4Addr{*recordHostIpAddr}
+	recordHostIPAddrSlice := []HostRecordIpv4Addr{*recordHostIPAddr}
 	recordHost := NewHostRecord(HostRecord{
 		Name:        recordName,
-		EnableDns:   enableDNS,
+		EnableDNS:   enableDNS,
 		NetworkView: netview,
 		View:        dnsview,
-		Ipv4Addrs:   recordHostIpAddrSlice,
+		Ipv4Addrs:   recordHostIPAddrSlice,
 		Ea:          eas})
 
 	ref, err := objMgr.connector.CreateObject(recordHost)
@@ -472,12 +499,14 @@ func (objMgr *ObjectManager) CreateHostRecord(enabledns bool, recordName string,
 	return recordHost, err
 }
 
+// GetHostRecordByRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetHostRecordByRef(ref string) (*HostRecord, error) {
 	recordHost := NewHostRecord(HostRecord{})
 	err := objMgr.connector.GetObject(recordHost, ref, &recordHost)
 	return recordHost, err
 }
 
+// GetHostRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetHostRecord(recordName string) (*HostRecord, error) {
 	var res []HostRecord
 
@@ -495,16 +524,18 @@ func (objMgr *ObjectManager) GetHostRecord(recordName string) (*HostRecord, erro
 
 }
 
-func (objMgr *ObjectManager) GetIpAddressFromHostRecord(host HostRecord) (string, error) {
+// GetIPAddressFromHostRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
+func (objMgr *ObjectManager) GetIPAddressFromHostRecord(host HostRecord) (string, error) {
 	err := objMgr.connector.GetObject(&host, host.Ref, &host)
 	return host.Ipv4Addrs[0].Ipv4Addr, err
 }
 
+// UpdateHostRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) UpdateHostRecord(hostRref string, ipAddr string, macAddress string, vmID string, vmName string) (string, error) {
 
-	recordHostIpAddr := NewHostRecordIpv4Addr(HostRecordIpv4Addr{Mac: macAddress, Ipv4Addr: ipAddr})
-	recordHostIpAddrSlice := []HostRecordIpv4Addr{*recordHostIpAddr}
-	updateHostRecord := NewHostRecord(HostRecord{Ipv4Addrs: recordHostIpAddrSlice})
+	recordHostIPAddr := NewHostRecordIpv4Addr(HostRecordIpv4Addr{Mac: macAddress, Ipv4Addr: ipAddr})
+	recordHostIPAddrSlice := []HostRecordIpv4Addr{*recordHostIPAddr}
+	updateHostRecord := NewHostRecord(HostRecord{Ipv4Addrs: recordHostIPAddrSlice})
 
 	ea := objMgr.getBasicEA(true)
 	if vmID != "" {
@@ -520,10 +551,12 @@ func (objMgr *ObjectManager) UpdateHostRecord(hostRref string, ipAddr string, ma
 	return ref, err
 }
 
+// DeleteHostRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeleteHostRecord(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
 
+// CreateARecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateARecord(netview string, dnsview string, recordname string, cidr string, ipAddr string, ea EA) (*RecordA, error) {
 
 	eas := objMgr.extendEA(ea)
@@ -543,15 +576,19 @@ func (objMgr *ObjectManager) CreateARecord(netview string, dnsview string, recor
 	return recordA, err
 }
 
+// GetARecordByRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetARecordByRef(ref string) (*RecordA, error) {
 	recordA := NewRecordA(RecordA{})
 	err := objMgr.connector.GetObject(recordA, ref, &recordA)
 	return recordA, err
 }
+
+// DeleteARecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeleteARecord(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
 
+// CreateCNAMERecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreateCNAMERecord(canonical string, recordname string, dnsview string, ea EA) (*RecordCNAME, error) {
 
 	eas := objMgr.extendEA(ea)
@@ -567,17 +604,19 @@ func (objMgr *ObjectManager) CreateCNAMERecord(canonical string, recordname stri
 	return recordCNAME, err
 }
 
+// GetCNAMERecordByRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetCNAMERecordByRef(ref string) (*RecordCNAME, error) {
 	recordCNAME := NewRecordCNAME(RecordCNAME{})
 	err := objMgr.connector.GetObject(recordCNAME, ref, &recordCNAME)
 	return recordCNAME, err
 }
 
+// DeleteCNAMERecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeleteCNAMERecord(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
 
-// Creates TXT Record. Use TTL of 0 to inherit TTL from the Zone
+// CreateTXTRecord creates TXT Record. Use TTL of 0 to inherit TTL from the Zone
 func (objMgr *ObjectManager) CreateTXTRecord(recordname string, text string, ttl int, dnsview string) (*RecordTXT, error) {
 
 	recordTXT := NewRecordTXT(RecordTXT{
@@ -592,12 +631,14 @@ func (objMgr *ObjectManager) CreateTXTRecord(recordname string, text string, ttl
 	return recordTXT, err
 }
 
+// GetTXTRecordByRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetTXTRecordByRef(ref string) (*RecordTXT, error) {
 	recordTXT := NewRecordTXT(RecordTXT{})
 	err := objMgr.connector.GetObject(recordTXT, ref, &recordTXT)
 	return recordTXT, err
 }
 
+// GetTXTRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetTXTRecord(name string) (*RecordTXT, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name can not be empty")
@@ -615,6 +656,7 @@ func (objMgr *ObjectManager) GetTXTRecord(name string) (*RecordTXT, error) {
 	return &res[0], nil
 }
 
+// UpdateTXTRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) UpdateTXTRecord(recordname string, text string) (*RecordTXT, error) {
 	var res []RecordTXT
 
@@ -622,8 +664,8 @@ func (objMgr *ObjectManager) UpdateTXTRecord(recordname string, text string) (*R
 
 	err := objMgr.connector.GetObject(recordTXT, "", &res)
 
-	if len(res) == 0 {
-		return nil, nil
+	if err != nil || len(res) == 0 {
+		return nil, err
 	}
 
 	res[0].Text = text
@@ -639,10 +681,12 @@ func (objMgr *ObjectManager) UpdateTXTRecord(recordname string, text string) (*R
 	return &res[0], nil
 }
 
+// DeleteTXTRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeleteTXTRecord(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
 
+// CreatePTRRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) CreatePTRRecord(netview string, dnsview string, recordname string, cidr string, ipAddr string, ea EA) (*RecordPTR, error) {
 
 	eas := objMgr.extendEA(ea)
@@ -662,12 +706,14 @@ func (objMgr *ObjectManager) CreatePTRRecord(netview string, dnsview string, rec
 	return recordPTR, err
 }
 
+// GetPTRRecordByRef https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) GetPTRRecordByRef(ref string) (*RecordPTR, error) {
 	recordPTR := NewRecordPTR(RecordPTR{})
 	err := objMgr.connector.GetObject(recordPTR, ref, &recordPTR)
 	return recordPTR, err
 }
 
+// DeletePTRRecord https://github.com/infobloxopen/infoblox-swagger-wapi/issues/1
 func (objMgr *ObjectManager) DeletePTRRecord(ref string) (string, error) {
 	return objMgr.connector.DeleteObject(ref)
 }
@@ -700,7 +746,7 @@ func (objMgr *ObjectManager) GetUpgradeStatus(statusType string) ([]UpgradeStatu
 	if statusType == "" {
 		// TODO option may vary according to the WAPI version, need to
 		// throw relevant  error.
-		msg := fmt.Sprintf("Status type can not be nil")
+		msg := "Status type can not be nil"
 		return res, errors.New(msg)
 	}
 	upgradestatus := NewUpgradeStatus(UpgradeStatus{Type: statusType})
@@ -737,7 +783,7 @@ func (objMgr *ObjectManager) GetLicense() ([]License, error) {
 	return res, err
 }
 
-// GetLicense returns the license details for grid
+// GetGridLicense returns the license details for grid
 func (objMgr *ObjectManager) GetGridLicense() ([]License, error) {
 	var res []License
 
@@ -761,16 +807,15 @@ func (objMgr *ObjectManager) CreateZoneAuth(fqdn string, ea EA) (*ZoneAuth, erro
 	eas := objMgr.extendEA(ea)
 
 	zoneAuth := NewZoneAuth(ZoneAuth{
-		Fqdn:     fqdn,
-		Ea:       eas})
-
+		Fqdn: fqdn,
+		Ea:   eas})
 
 	ref, err := objMgr.connector.CreateObject(zoneAuth)
 	zoneAuth.Ref = ref
 	return zoneAuth, err
 }
 
-// Retreive a authortative zone by ref 
+// GetZoneAuthByRef retreives an authortative zone by ref
 func (objMgr *ObjectManager) GetZoneAuthByRef(ref string) (ZoneAuth, error) {
 	var res ZoneAuth
 
@@ -817,10 +862,10 @@ func (objMgr *ObjectManager) GetZoneDelegated(fqdn string) (*ZoneDelegated, erro
 }
 
 // CreateZoneDelegated creates delegated zone
-func (objMgr *ObjectManager) CreateZoneDelegated(fqdn string, delegate_to []NameServer) (*ZoneDelegated, error) {
+func (objMgr *ObjectManager) CreateZoneDelegated(fqdn string, delegateTo []NameServer) (*ZoneDelegated, error) {
 	zoneDelegated := NewZoneDelegated(ZoneDelegated{
 		Fqdn:       fqdn,
-		DelegateTo: delegate_to})
+		DelegateTo: delegateTo})
 
 	ref, err := objMgr.connector.CreateObject(zoneDelegated)
 	zoneDelegated.Ref = ref
@@ -829,10 +874,10 @@ func (objMgr *ObjectManager) CreateZoneDelegated(fqdn string, delegate_to []Name
 }
 
 // UpdateZoneDelegated updates delegated zone
-func (objMgr *ObjectManager) UpdateZoneDelegated(ref string, delegate_to []NameServer) (*ZoneDelegated, error) {
+func (objMgr *ObjectManager) UpdateZoneDelegated(ref string, delegateTo []NameServer) (*ZoneDelegated, error) {
 	zoneDelegated := NewZoneDelegated(ZoneDelegated{
 		Ref:        ref,
-		DelegateTo: delegate_to})
+		DelegateTo: delegateTo})
 
 	refResp, err := objMgr.connector.UpdateObject(zoneDelegated, ref)
 	zoneDelegated.Ref = refResp
