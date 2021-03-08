@@ -168,8 +168,8 @@ func (l *NetworkViewLock) getLock() bool {
 		if t, ok := nw.Ea[l.LockTimeoutEA]; ok {
 			if int32(time.Now().Unix())-int32(t.(int)) > timeout {
 				logrus.Debugln("Lock is timed out. Forcefully acquiring it.")
-				//remove the lock forcefully and acquire it
-				l.UnLock(true)
+				//remove the lock forcefully, ignoring errors, and acquire it
+				_ = l.UnLock(true)
 				// try to get lock again
 				return l.getLock()
 			}
@@ -209,7 +209,7 @@ func (l *NetworkViewLock) Lock() error {
 	for {
 		// Get lock on the network view
 		lock := l.getLock()
-		if lock == true {
+		if lock {
 			// Got the lock.
 			logrus.Debugf("Got the lock on Network View %s\n", l.Name)
 			return nil

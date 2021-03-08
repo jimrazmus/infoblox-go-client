@@ -146,7 +146,7 @@ type NetworkSetting struct {
 	Gateway    string `json:"gateway"`
 	Primary    bool   `json:"primary"`
 	SubnetMask string `json:"subnet_mask"`
-	UseDscp    bool   `json:"use_dscp,omiempty"`
+	UseDscp    bool   `json:"use_dscp,omitempty"`
 	VlanID     uint   `json:"vlan_id,omitempty"`
 }
 
@@ -159,7 +159,7 @@ type Ipv6Setting struct {
 	Gateway                 string `json:"gateway"`
 	Primary                 string `json:"primary,omitempty"`
 	VirtualIP               string `json:"virtual_ip"`
-	VlanID                  uint   `json:"vlan_id,emitempty"`
+	VlanID                  uint   `json:"vlan_id,omitempty"`
 	UseDscp                 bool   `json:"use_dscp,omitempty"`
 }
 

@@ -51,7 +51,7 @@ func NewTransportConfig(sslVerify string, httpRequestTimeout int, httpPoolConnec
 			return
 		}
 		if !caPool.AppendCertsFromPEM(cert) {
-			err = fmt.Errorf("Cannot append certificate from file '%s'", sslVerify)
+			// err = fmt.Errorf("Cannot append certificate from file '%s'", sslVerify)
 			return
 		}
 		cfg.certPool = caPool
@@ -138,7 +138,7 @@ func getHTTPResponseError(resp *http.Response) error {
 	defer resp.Body.Close()
 	content, _ := ioutil.ReadAll(resp.Body)
 	msg := fmt.Sprintf("WAPI request error: %d('%s')\nContents:\n%s\n", resp.StatusCode, resp.Status, content)
-	log.Printf(msg)
+	log.Print(msg)
 	return errors.New(msg)
 }
 
@@ -275,11 +275,17 @@ func (wrb *WapiRequestBuilder) BuildRequest(t RequestType, obj IBObject, ref str
 func (c *Connector) makeRequest(t RequestType, obj IBObject, ref string, queryParams QueryParams) (res []byte, err error) {
 	var req *http.Request
 	req, err = c.RequestBuilder.BuildRequest(t, obj, ref, queryParams)
+	if err != nil {
+		return
+	}
 	res, err = c.Requestor.SendRequest(req)
 	if err != nil {
 		/* Forcing the request to redirect to Grid Master by making forcedProxy=true */
 		queryParams.forceProxy = true
 		req, err = c.RequestBuilder.BuildRequest(t, obj, ref, queryParams)
+		if err != nil {
+			return
+		}
 		res, err = c.Requestor.SendRequest(req)
 	}
 
@@ -309,6 +315,9 @@ func (c *Connector) CreateObject(obj IBObject) (ref string, err error) {
 func (c *Connector) GetObject(obj IBObject, ref string, res interface{}) (err error) {
 	queryParams := QueryParams{forceProxy: false}
 	resp, err := c.makeRequest(GET, obj, ref, queryParams)
+	if err != nil {
+		return err
+	}
 	//to check empty underlying value of interface
 	var result interface{}
 	err = json.Unmarshal(resp, &result)

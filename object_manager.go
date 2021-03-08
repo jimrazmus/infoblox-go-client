@@ -664,8 +664,8 @@ func (objMgr *ObjectManager) UpdateTXTRecord(recordname string, text string) (*R
 
 	err := objMgr.connector.GetObject(recordTXT, "", &res)
 
-	if len(res) == 0 {
-		return nil, nil
+	if err != nil || len(res) == 0 {
+		return nil, err
 	}
 
 	res[0].Text = text
@@ -746,7 +746,7 @@ func (objMgr *ObjectManager) GetUpgradeStatus(statusType string) ([]UpgradeStatu
 	if statusType == "" {
 		// TODO option may vary according to the WAPI version, need to
 		// throw relevant  error.
-		msg := fmt.Sprintf("Status type can not be nil")
+		msg := "Status type can not be nil"
 		return res, errors.New(msg)
 	}
 	upgradestatus := NewUpgradeStatus(UpgradeStatus{Type: statusType})
