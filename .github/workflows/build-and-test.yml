@@ -19,15 +19,10 @@ jobs:
       - name: Format
         run: go fmt .
 
-      - name: Lint
+      - name: Lint & Errcheck
         uses: golangci/golangci-lint-action@v2
         with:
           skip-go-installation: true
-
-      - name: Errcheck
-        run: |
-          go get -u github.com/kisielk/errcheck
-          errcheck ./...
 
       - name: Test
         run: |
