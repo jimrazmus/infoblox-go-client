@@ -22,7 +22,7 @@ type IBObjectManager interface {
 	CreateNetworkView(name string) (*NetworkView, error)
 	CreatePTRRecord(netview string, dnsview string, recordname string, cidr string, ipAddr string, ea EA) (*RecordPTR, error)
 	DeleteARecord(ref string) (string, error)
-	DeleteZoneAuth(ref string) (string, error) 
+	DeleteZoneAuth(ref string) (string, error)
 	DeleteCNAMERecord(ref string) (string, error)
 	DeleteFixedAddress(ref string) (string, error)
 	DeleteHostRecord(ref string) (string, error)
@@ -807,16 +807,15 @@ func (objMgr *ObjectManager) CreateZoneAuth(fqdn string, ea EA) (*ZoneAuth, erro
 	eas := objMgr.extendEA(ea)
 
 	zoneAuth := NewZoneAuth(ZoneAuth{
-		Fqdn:     fqdn,
-		Ea:       eas})
-
+		Fqdn: fqdn,
+		Ea:   eas})
 
 	ref, err := objMgr.connector.CreateObject(zoneAuth)
 	zoneAuth.Ref = ref
 	return zoneAuth, err
 }
 
-// GetZoneAuthByRef retreives an authortative zone by ref 
+// GetZoneAuthByRef retreives an authortative zone by ref
 func (objMgr *ObjectManager) GetZoneAuthByRef(ref string) (ZoneAuth, error) {
 	var res ZoneAuth
 

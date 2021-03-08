@@ -146,8 +146,8 @@ func getHTTPResponseError(resp *http.Response) error {
 func (whr *WapiHTTPRequestor) Init(cfg TransportConfig) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: !cfg.SslVerify,
-			RootCAs: cfg.certPool,
-			Renegotiation:      tls.RenegotiateOnceAsClient},
+			RootCAs:       cfg.certPool,
+			Renegotiation: tls.RenegotiateOnceAsClient},
 		MaxIdleConnsPerHost: cfg.HTTPPoolConnections,
 	}
 

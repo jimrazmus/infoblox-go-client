@@ -147,7 +147,7 @@ type NetworkSetting struct {
 	Primary    bool   `json:"primary"`
 	SubnetMask string `json:"subnet_mask"`
 	UseDscp    bool   `json:"use_dscp,omiempty"`
-	VlanID    uint   `json:"vlan_id,omitempty"`
+	VlanID     uint   `json:"vlan_id,omitempty"`
 }
 
 // Ipv6Setting ???

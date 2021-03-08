@@ -65,7 +65,7 @@ func (c *fakeConnector) GetObject(obj IBObject, ref string, res interface{}) (er
 	} else {
 		switch obj.(type) {
 		case *ZoneAuth:
-		 	*res.(*ZoneAuth) = c.resultObject.(ZoneAuth)
+			*res.(*ZoneAuth) = c.resultObject.(ZoneAuth)
 		case *NetworkView:
 			*res.(*NetworkView) = c.resultObject.(NetworkView)
 		}
@@ -1640,7 +1640,7 @@ var _ = Describe("Object Manager", func() {
 		}
 
 		objMgr := NewObjectManager(zaFakeConnector, cmpType, tenantID)
-		
+
 		ea := objMgr.getBasicEA(true)
 
 		zaFakeConnector.createObjectObj.(*ZoneAuth).Ea = ea
@@ -1671,7 +1671,7 @@ var _ = Describe("Object Manager", func() {
 			getObjectObj: NewZoneAuth(ZoneAuth{}),
 			getObjectRef: fakeRefReturn,
 			resultObject: *NewZoneAuth(ZoneAuth{Fqdn: fqdn}),
-	    }
+		}
 
 		objMgr := NewObjectManager(zdFakeConnector, cmpType, tenantID)
 
@@ -1680,7 +1680,7 @@ var _ = Describe("Object Manager", func() {
 		It("should pass expected ZoneAuth Object to GetObject", func() {
 			actualZoneAuth, err = objMgr.GetZoneAuthByRef(fakeRefReturn)
 		})
-		fmt.Printf("doodo  %s",actualZoneAuth)
+		fmt.Printf("doodo  %s", actualZoneAuth)
 		It("should return expected ZoneAuth Object", func() {
 			Expect(actualZoneAuth).To(Equal(zdFakeConnector.resultObject))
 			Expect(err).To(BeNil())
