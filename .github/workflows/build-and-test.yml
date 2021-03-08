@@ -21,6 +21,8 @@ jobs:
 
       - name: Lint
         uses: golangci/golangci-lint-action@v2
+        with:
+          skip-go-installation: true
 
       - name: Errcheck
         run: |
