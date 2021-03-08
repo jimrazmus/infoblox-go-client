@@ -28,7 +28,7 @@ func (rb *FakeRequestBuilder) Init(cfg HostConfig) {
 	rb.hostConfig = cfg
 }
 
-func (rb *FakeRequestBuilder) BuildUrl(r RequestType, objType string, ref string, returnFields []string, queryParams QueryParams) string {
+func (rb *FakeRequestBuilder) BuildURL(r RequestType, objType string, ref string, returnFields []string, queryParams QueryParams) string {
 	return rb.urlStr
 }
 
@@ -48,7 +48,7 @@ func (rb *FakeRequestBuilder) BuildRequest(r RequestType, obj IBObject, ref stri
 	return rb.req, nil
 }
 
-type FakeHttpRequestor struct {
+type FakeHTTPRequestor struct {
 	config TransportConfig
 
 	req *http.Request

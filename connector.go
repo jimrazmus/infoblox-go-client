@@ -19,6 +19,7 @@ import (
 	"golang.org/x/net/publicsuffix"
 )
 
+// HostConfig defines the InfoBlox host
 type HostConfig struct {
 	Host     string
 	Version  string
@@ -27,13 +28,15 @@ type HostConfig struct {
 	Password string
 }
 
+// TransportConfig contains HTTP transport configuration
 type TransportConfig struct {
 	SslVerify           bool
 	certPool            *x509.CertPool
-	HttpRequestTimeout  time.Duration // in seconds
-	HttpPoolConnections int
+	HTTPRequestTimeout  time.Duration // in seconds
+	HTTPPoolConnections int
 }
 
+// NewTransportConfig a newly created TransportConfig
 func NewTransportConfig(sslVerify string, httpRequestTimeout int, httpPoolConnections int) (cfg TransportConfig) {
 	switch {
 	case "false" == strings.ToLower(sslVerify):
@@ -55,31 +58,38 @@ func NewTransportConfig(sslVerify string, httpRequestTimeout int, httpPoolConnec
 		cfg.SslVerify = true
 	}
 
-	cfg.HttpPoolConnections = httpPoolConnections
-	cfg.HttpRequestTimeout = time.Duration(httpRequestTimeout)
+	cfg.HTTPPoolConnections = httpPoolConnections
+	cfg.HTTPRequestTimeout = time.Duration(httpRequestTimeout)
 	return
 }
 
-type HttpRequestBuilder interface {
+// HTTPRequestBuilder is the interface implemented by InfoBlox WAPI clients
+// for creating HTTP requests
+type HTTPRequestBuilder interface {
 	Init(HostConfig)
 	BuildUrl(r RequestType, objType string, ref string, returnFields []string, queryParams QueryParams) (urlStr string)
 	BuildBody(r RequestType, obj IBObject) (jsonStr []byte)
 	BuildRequest(r RequestType, obj IBObject, ref string, queryParams QueryParams) (req *http.Request, err error)
 }
 
-type HttpRequestor interface {
+// HTTPRequestor is the interface implemented by clients to send HTTP requests
+// to an InfoBlox WAPI endpoint.
+type HTTPRequestor interface {
 	Init(TransportConfig)
 	SendRequest(*http.Request) ([]byte, error)
 }
 
+// WapiRequestBuilder TBD
 type WapiRequestBuilder struct {
 	HostConfig HostConfig
 }
 
-type WapiHttpRequestor struct {
+// WapiHTTPRequestor TBD
+type WapiHTTPRequestor struct {
 	client http.Client
 }
 
+// IBConnector TBD
 type IBConnector interface {
 	CreateObject(obj IBObject) (ref string, err error)
 	GetObject(obj IBObject, ref string, res interface{}) error
@@ -87,19 +97,25 @@ type IBConnector interface {
 	UpdateObject(obj IBObject, ref string) (refRes string, err error)
 }
 
+// Connector TBD
 type Connector struct {
 	HostConfig      HostConfig
 	TransportConfig TransportConfig
-	RequestBuilder  HttpRequestBuilder
-	Requestor       HttpRequestor
+	RequestBuilder  HTTPRequestBuilder
+	Requestor       HTTPRequestor
 }
 
+// RequestType wraps conversion between CRUD and HTTP methods
 type RequestType int
 
 const (
+	// CREATE indicates an object should be created via HTTP POST
 	CREATE RequestType = iota
+	// GET indicates an object should be retrieved via HTTP GET
 	GET
+	// DELETE indicates an object should be removed via HTTP DELETE
 	DELETE
+	// UPDATE indicates an object should be modified via HTTP PUT
 	UPDATE
 )
 
@@ -126,12 +142,13 @@ func getHTTPResponseError(resp *http.Response) error {
 	return errors.New(msg)
 }
 
-func (whr *WapiHttpRequestor) Init(cfg TransportConfig) {
+// Init sets up a connector client
+func (whr *WapiHTTPRequestor) Init(cfg TransportConfig) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: !cfg.SslVerify,
 			RootCAs: cfg.certPool,
 			Renegotiation:      tls.RenegotiateOnceAsClient},
-		MaxIdleConnsPerHost: cfg.HttpPoolConnections,
+		MaxIdleConnsPerHost: cfg.HTTPPoolConnections,
 	}
 
 	// All users of cookiejar should import "golang.org/x/net/publicsuffix"
@@ -140,10 +157,11 @@ func (whr *WapiHttpRequestor) Init(cfg TransportConfig) {
 		log.Fatal(err)
 	}
 
-	whr.client = http.Client{Jar: jar, Transport: tr, Timeout: cfg.HttpRequestTimeout * time.Second}
+	whr.client = http.Client{Jar: jar, Transport: tr, Timeout: cfg.HTTPRequestTimeout * time.Second}
 }
 
-func (whr *WapiHttpRequestor) SendRequest(req *http.Request) (res []byte, err error) {
+// SendRequest makes an HTTP request and returns the response body
+func (whr *WapiHTTPRequestor) SendRequest(req *http.Request) (res []byte, err error) {
 	var resp *http.Response
 	resp, err = whr.client.Do(req)
 	if err != nil {
@@ -164,11 +182,13 @@ func (whr *WapiHttpRequestor) SendRequest(req *http.Request) (res []byte, err er
 	return
 }
 
+// Init copies the provided HostConfig into the WapiRequestBuilder
 func (wrb *WapiRequestBuilder) Init(cfg HostConfig) {
 	wrb.HostConfig = cfg
 }
 
-func (wrb *WapiRequestBuilder) BuildUrl(t RequestType, objType string, ref string, returnFields []string, queryParams QueryParams) (urlStr string) {
+// BuildURL implements the construction of a InfoBlox WAPI URL
+func (wrb *WapiRequestBuilder) BuildURL(t RequestType, objType string, ref string, returnFields []string, queryParams QueryParams) (urlStr string) {
 	path := []string{"wapi", "v" + wrb.HostConfig.Version}
 	if len(ref) > 0 {
 		path = append(path, ref)
@@ -199,6 +219,8 @@ func (wrb *WapiRequestBuilder) BuildUrl(t RequestType, objType string, ref strin
 	return u.String()
 }
 
+// BuildBody implements the construction of a JSON object for use as the
+// body of an HTTP request
 func (wrb *WapiRequestBuilder) BuildBody(t RequestType, obj IBObject) []byte {
 	var objJSON []byte
 	var err error
@@ -222,6 +244,7 @@ func (wrb *WapiRequestBuilder) BuildBody(t RequestType, obj IBObject) []byte {
 	return objJSON
 }
 
+// BuildRequest implements the construction of an HTTP request
 func (wrb *WapiRequestBuilder) BuildRequest(t RequestType, obj IBObject, ref string, queryParams QueryParams) (req *http.Request, err error) {
 	var (
 		objType      string
@@ -231,7 +254,7 @@ func (wrb *WapiRequestBuilder) BuildRequest(t RequestType, obj IBObject, ref str
 		objType = obj.ObjectType()
 		returnFields = obj.ReturnFields()
 	}
-	urlStr := wrb.BuildUrl(t, objType, ref, returnFields, queryParams)
+	urlStr := wrb.BuildURL(t, objType, ref, returnFields, queryParams)
 
 	var bodyStr []byte
 	if obj != nil {
@@ -263,6 +286,7 @@ func (c *Connector) makeRequest(t RequestType, obj IBObject, ref string, queryPa
 	return
 }
 
+// CreateObject makes a WAPI request to create the specified object
 func (c *Connector) CreateObject(obj IBObject) (ref string, err error) {
 	ref = ""
 	queryParams := QueryParams{forceProxy: false}
@@ -281,6 +305,7 @@ func (c *Connector) CreateObject(obj IBObject) (ref string, err error) {
 	return
 }
 
+// GetObject makes a WAPI request to get the specified object
 func (c *Connector) GetObject(obj IBObject, ref string, res interface{}) (err error) {
 	queryParams := QueryParams{forceProxy: false}
 	resp, err := c.makeRequest(GET, obj, ref, queryParams)
@@ -310,6 +335,7 @@ func (c *Connector) GetObject(obj IBObject, ref string, res interface{}) (err er
 	return
 }
 
+// DeleteObject makes a WAPI request to delete the specified object
 func (c *Connector) DeleteObject(ref string) (refRes string, err error) {
 	refRes = ""
 	queryParams := QueryParams{forceProxy: false}
@@ -328,6 +354,7 @@ func (c *Connector) DeleteObject(ref string) (refRes string, err error) {
 	return
 }
 
+// UpdateObject makes a WAPI request to update the specified object
 func (c *Connector) UpdateObject(obj IBObject, ref string) (refRes string, err error) {
 	queryParams := QueryParams{forceProxy: false}
 	refRes = ""
@@ -358,6 +385,7 @@ func (c *Connector) Logout() (err error) {
 	return
 }
 
+// ValidateConnector validates basic auth and reachability of the Connector
 var ValidateConnector = validateConnector
 
 func validateConnector(c *Connector) (err error) {
@@ -371,8 +399,9 @@ func validateConnector(c *Connector) (err error) {
 	return
 }
 
+// NewConnector instantiates a new Connector
 func NewConnector(hostConfig HostConfig, transportConfig TransportConfig,
-	requestBuilder HttpRequestBuilder, requestor HttpRequestor) (res *Connector, err error) {
+	requestBuilder HTTPRequestBuilder, requestor HTTPRequestor) (res *Connector, err error) {
 	res = nil
 
 	connector := &Connector{

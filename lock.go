@@ -13,11 +13,14 @@ const (
 	freeLockVal string = "Available"
 )
 
+// Lock is the interface implemented by clients needing serialized access to
+// a network view
 type Lock interface {
 	Lock() error
 	UnLock(force bool) error
 }
 
+// NetworkViewLock contains lock data
 type NetworkViewLock struct {
 	Name          string
 	ObjMgr        *ObjectManager
@@ -183,6 +186,8 @@ func (l *NetworkViewLock) getLock() bool {
 	return false
 }
 
+// Lock attempts to lock on a network view. Lock will retry up to 10 times with
+// a random delay, between 1 and 10 seconds, between each attempt.
 func (l *NetworkViewLock) Lock() error {
 
 	// verify if network view exists and has EA for the lock
@@ -223,6 +228,7 @@ func (l *NetworkViewLock) Lock() error {
 	}
 }
 
+// UnLock attempts to release a lock on a network view.
 func (l *NetworkViewLock) UnLock(force bool) error {
 	// To unlock set the Docker-Plugin-Lock EA of network view to Available and
 	// remove the Docker-Plugin-Lock-Time EA

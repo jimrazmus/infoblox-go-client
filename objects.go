@@ -7,22 +7,26 @@ import (
 	"reflect"
 )
 
-const MACADDR_ZERO = "00:00:00:00:00:00"
-
+// Bool ???
 type Bool bool
 
+// EA ???
 type EA map[string]interface{}
 
+// EASearch ???
 type EASearch map[string]interface{}
 
+// EADefListValue ???
 type EADefListValue string
 
+// IBBase ???
 type IBBase struct {
 	objectType   string
 	returnFields []string
 	eaSearch     EASearch
 }
 
+// IBObject ???
 type IBObject interface {
 	ObjectType() string
 	ReturnFields() []string
@@ -30,18 +34,22 @@ type IBObject interface {
 	//SetReturnFields([]string)
 }
 
+// ObjectType ???
 func (obj *IBBase) ObjectType() string {
 	return obj.objectType
 }
 
+// ReturnFields ???
 func (obj *IBBase) ReturnFields() []string {
 	return obj.returnFields
 }
 
+// EaSearch ???
 func (obj *IBBase) EaSearch() EASearch {
 	return obj.eaSearch
 }
 
+// NetworkView ???
 type NetworkView struct {
 	IBBase `json:"-"`
 	Ref    string `json:"_ref,omitempty"`
@@ -49,6 +57,7 @@ type NetworkView struct {
 	Ea     EA     `json:"extattrs,omitempty"`
 }
 
+// NewNetworkView ???
 func NewNetworkView(nv NetworkView) *NetworkView {
 	res := nv
 	res.objectType = "networkview"
@@ -66,6 +75,7 @@ type UpgradeStatus struct {
 	UpgradeGroup     string              `json:"upgrade_group,omitempty"`
 }
 
+// NewUpgradeStatus ???
 func NewUpgradeStatus(upgradeStatus UpgradeStatus) *UpgradeStatus {
 	result := upgradeStatus
 	returnFields := []string{"subelements_status", "type"}
@@ -88,6 +98,7 @@ type SubElementsStatus struct {
 	Member         string `json:"member"`
 }
 
+// Network ???
 type Network struct {
 	IBBase
 	Ref         string `json:"_ref,omitempty"`
@@ -96,6 +107,7 @@ type Network struct {
 	Ea          EA     `json:"extattrs,omitempty"`
 }
 
+// NewNetwork ???
 func NewNetwork(nw Network) *Network {
 	res := nw
 	res.objectType = "network"
@@ -104,12 +116,14 @@ func NewNetwork(nw Network) *Network {
 	return &res
 }
 
+// ServiceStatus ???
 type ServiceStatus struct {
 	Desciption string `json:"description,omitempty"`
 	Service    string `json:"service,omitempty"`
 	Status     string `json:"status,omitempty"`
 }
 
+// LanHaPortSetting ???
 type LanHaPortSetting struct {
 	HAIpAddress    string              `json:"ha_ip_address,omitempty"`
 	HaPortSetting  PhysicalPortSetting `json:"ha_port_setting,omitempty"`
@@ -118,12 +132,14 @@ type LanHaPortSetting struct {
 	MgmtLan        string              `json:"mgmt_lan,omitempty"`
 }
 
+// PhysicalPortSetting ???
 type PhysicalPortSetting struct {
 	AutoPortSettingEnabled bool   `json:"auto_port_setting_enabled"`
 	Duplex                 string `json:"duplex,omitempty"`
 	Speed                  string `json:"speed,omitempty"`
 }
 
+// NetworkSetting ???
 type NetworkSetting struct {
 	Address    string `json:"address"`
 	Dscp       uint   `json:"dscp"`
@@ -131,8 +147,10 @@ type NetworkSetting struct {
 	Primary    bool   `json:"primary"`
 	SubnetMask string `json:"subnet_mask"`
 	UseDscp    bool   `json:"use_dscp,omiempty"`
-	VlanId     uint   `json:"vlan_id,omitempty"`
+	VlanID    uint   `json:"vlan_id,omitempty"`
 }
+
+// Ipv6Setting ???
 type Ipv6Setting struct {
 	AutoRouterConfigEnabled bool   `json:"auto_router_config_enabled"`
 	CidrPrefix              uint   `json:"cidr_prefix,omitempty"`
@@ -140,14 +158,15 @@ type Ipv6Setting struct {
 	Enabled                 bool   `json:"enabled,omitempty"`
 	Gateway                 string `json:"gateway"`
 	Primary                 string `json:"primary,omitempty"`
-	VirtualIp               string `json:"virtual_ip"`
-	VlanId                  uint   `json:"vlan_id,emitempty"`
+	VirtualIP               string `json:"virtual_ip"`
+	VlanID                  uint   `json:"vlan_id,emitempty"`
 	UseDscp                 bool   `json:"use_dscp,omitempty"`
 }
 
+// NodeInfo ???
 type NodeInfo struct {
 	HaStatus             string              `json:"ha_status,omitempty"`
-	HwId                 string              `json:"hwid,omitempty"`
+	HwID                 string              `json:"hwid,omitempty"`
 	HwModel              string              `json:"hwmodel,omitempty"`
 	HwPlatform           string              `json:"hwplatform,omitempty"`
 	HwType               string              `json:"hwtype,omitempty"`
@@ -173,6 +192,7 @@ type Member struct {
 	TimeZone                 string     `json:"time_zone,omitempty"`
 }
 
+// NewMember ???
 func NewMember(member Member) *Member {
 	res := member
 	res.objectType = "member"
@@ -195,6 +215,7 @@ type License struct {
 	Licensetype      string `json:"type,omitempty"`
 }
 
+// NewGridLicense ???
 func NewGridLicense(license License) *License {
 	result := license
 	result.objectType = "license:gridwide"
@@ -208,6 +229,7 @@ func NewGridLicense(license License) *License {
 	return &result
 }
 
+// NewLicense ???
 func NewLicense(license License) *License {
 	result := license
 	returnFields := []string{"expiration_status",
@@ -237,6 +259,7 @@ type CapacityReport struct {
 	TotalObjects int                      `json:"total_objects,omitempty"`
 }
 
+// NewCapcityReport ???
 func NewCapcityReport(capReport CapacityReport) *CapacityReport {
 	res := capReport
 	returnFields := []string{"name", "hardware_type", "max_capacity", "object_counts", "percent_used", "role", "total_objects"}
@@ -245,6 +268,7 @@ func NewCapcityReport(capReport CapacityReport) *CapacityReport {
 	return &res
 }
 
+// NTPserver ???
 type NTPserver struct {
 	Address              string `json:"address,omitempty"`
 	Burst                bool   `json:"burst,omitempty"`
@@ -254,6 +278,7 @@ type NTPserver struct {
 	Preffered            bool   `json:"preffered,omitempty"`
 }
 
+// NTPSetting ???
 type NTPSetting struct {
 	EnableNTP  bool                   `json:"enable_ntp,omitempty"`
 	NTPAcl     map[string]interface{} `json:"ntp_acl,omitempty"`
@@ -262,6 +287,7 @@ type NTPSetting struct {
 	NTPServers []NTPserver            `json:"ntp_servers,omitempty"`
 }
 
+// Grid ???
 type Grid struct {
 	IBBase     `json:"-"`
 	Ref        string      `json:"_ref,omitempty"`
@@ -269,6 +295,7 @@ type Grid struct {
 	NTPSetting *NTPSetting `json:"ntp_setting,omitempty"`
 }
 
+// NewGrid ???
 func NewGrid(grid Grid) *Grid {
 	result := grid
 	result.objectType = "grid"
@@ -277,6 +304,7 @@ func NewGrid(grid Grid) *Grid {
 	return &result
 }
 
+// NetworkContainer ???
 type NetworkContainer struct {
 	IBBase      `json:"-"`
 	Ref         string `json:"_ref,omitempty"`
@@ -285,6 +313,7 @@ type NetworkContainer struct {
 	Ea          EA     `json:"extattrs,omitempty"`
 }
 
+// NewNetworkContainer ???
 func NewNetworkContainer(nc NetworkContainer) *NetworkContainer {
 	res := nc
 	res.objectType = "networkcontainer"
@@ -293,6 +322,7 @@ func NewNetworkContainer(nc NetworkContainer) *NetworkContainer {
 	return &res
 }
 
+// FixedAddress ???
 type FixedAddress struct {
 	IBBase      `json:"-"`
 	Ref         string `json:"_ref,omitempty"`
@@ -305,11 +335,12 @@ type FixedAddress struct {
 	Ea          EA     `json:"extattrs,omitempty"`
 }
 
-/*This is a general struct to add query params used in makeRequest*/
+// QueryParams is a general struct to add query params used in makeRequest
 type QueryParams struct {
 	forceProxy bool
 }
 
+// NewFixedAddress ???
 func NewFixedAddress(fixedAddr FixedAddress) *FixedAddress {
 	res := fixedAddr
 	res.objectType = "fixedaddress"
@@ -318,6 +349,7 @@ func NewFixedAddress(fixedAddr FixedAddress) *FixedAddress {
 	return &res
 }
 
+// EADefinition ???
 type EADefinition struct {
 	IBBase             `json:"-"`
 	Ref                string           `json:"_ref,omitempty"`
@@ -329,6 +361,7 @@ type EADefinition struct {
 	AllowedObjectTypes []string         `json:"allowed_object_types,omitempty"`
 }
 
+// NewEADefinition ???
 func NewEADefinition(eadef EADefinition) *EADefinition {
 	res := eadef
 	res.objectType = "extensibleattributedef"
@@ -337,12 +370,14 @@ func NewEADefinition(eadef EADefinition) *EADefinition {
 	return &res
 }
 
+// UserProfile ???
 type UserProfile struct {
 	IBBase `json:"-"`
 	Ref    string `json:"_ref,omitempty"`
 	Name   string `json:"name,omitempty"`
 }
 
+// NewUserProfile ???
 func NewUserProfile(userprofile UserProfile) *UserProfile {
 	res := userprofile
 	res.objectType = "userprofile"
@@ -351,6 +386,7 @@ func NewUserProfile(userprofile UserProfile) *UserProfile {
 	return &res
 }
 
+// RecordA ???
 type RecordA struct {
 	IBBase   `json:"-"`
 	Ref      string `json:"_ref,omitempty"`
@@ -361,6 +397,7 @@ type RecordA struct {
 	Ea       EA     `json:"extattrs,omitempty"`
 }
 
+// NewRecordA ???
 func NewRecordA(ra RecordA) *RecordA {
 	res := ra
 	res.objectType = "record:a"
@@ -369,6 +406,7 @@ func NewRecordA(ra RecordA) *RecordA {
 	return &res
 }
 
+// RecordPTR ???
 type RecordPTR struct {
 	IBBase   `json:"-"`
 	Ref      string `json:"_ref,omitempty"`
@@ -380,6 +418,7 @@ type RecordPTR struct {
 	Ea       EA     `json:"extattrs,omitempty"`
 }
 
+// NewRecordPTR ???
 func NewRecordPTR(rptr RecordPTR) *RecordPTR {
 	res := rptr
 	res.objectType = "record:ptr"
@@ -388,6 +427,7 @@ func NewRecordPTR(rptr RecordPTR) *RecordPTR {
 	return &res
 }
 
+// RecordCNAME ???
 type RecordCNAME struct {
 	IBBase    `json:"-"`
 	Ref       string `json:"_ref,omitempty"`
@@ -398,6 +438,7 @@ type RecordCNAME struct {
 	Ea        EA     `json:"extattrs,omitempty"`
 }
 
+// NewRecordCNAME ???
 func NewRecordCNAME(rc RecordCNAME) *RecordCNAME {
 	res := rc
 	res.objectType = "record:cname"
@@ -406,6 +447,7 @@ func NewRecordCNAME(rc RecordCNAME) *RecordCNAME {
 	return &res
 }
 
+// HostRecordIpv4Addr ???
 type HostRecordIpv4Addr struct {
 	IBBase   `json:"-"`
 	Ipv4Addr string `json:"ipv4addr,omitempty"`
@@ -415,12 +457,14 @@ type HostRecordIpv4Addr struct {
 	Cidr     string `json:"network,omitempty"`
 }
 
+// NewHostRecordIpv4Addr ???
 func NewHostRecordIpv4Addr(hostAddr HostRecordIpv4Addr) *HostRecordIpv4Addr {
 	res := hostAddr
 	res.objectType = "record:host_ipv4addr"
 	return &res
 }
 
+// HostRecord ???
 type HostRecord struct {
 	IBBase      `json:"-"`
 	Ref         string               `json:"_ref,omitempty"`
@@ -429,11 +473,12 @@ type HostRecord struct {
 	Name        string               `json:"name,omitempty"`
 	View        string               `json:"view,omitempty"`
 	Zone        string               `json:"zone,omitempty"`
-	EnableDns   *bool                `json:"configure_for_dns,omitempty"`
+	EnableDNS   *bool                `json:"configure_for_dns,omitempty"`
 	NetworkView string               `json:"network_view,omitempty"`
 	Ea          EA                   `json:"extattrs,omitempty"`
 }
 
+// NewHostRecord ???
 func NewHostRecord(rh HostRecord) *HostRecord {
 	res := rh
 	res.objectType = "record:host"
@@ -442,6 +487,7 @@ func NewHostRecord(rh HostRecord) *HostRecord {
 	return &res
 }
 
+// RecordTXT ???
 type RecordTXT struct {
 	IBBase `json:"-"`
 	Ref    string `json:"_ref,omitempty"`
@@ -453,6 +499,7 @@ type RecordTXT struct {
 	Ea     EA     `json:"extattrs,omitempty"`
 }
 
+// NewRecordTXT ???
 func NewRecordTXT(rt RecordTXT) *RecordTXT {
 	res := rt
 	res.objectType = "record:txt"
@@ -461,6 +508,7 @@ func NewRecordTXT(rt RecordTXT) *RecordTXT {
 	return &res
 }
 
+// ZoneAuth ???
 type ZoneAuth struct {
 	IBBase `json:"-"`
 	Ref    string `json:"_ref,omitempty"`
@@ -469,6 +517,7 @@ type ZoneAuth struct {
 	Ea     EA     `json:"extattrs,omitempty"`
 }
 
+// NewZoneAuth ???
 func NewZoneAuth(za ZoneAuth) *ZoneAuth {
 	res := za
 	res.objectType = "zone_auth"
@@ -477,11 +526,13 @@ func NewZoneAuth(za ZoneAuth) *ZoneAuth {
 	return &res
 }
 
+// NameServer ???
 type NameServer struct {
 	Address string `json:"address,omitempty"`
 	Name    string `json:"name,omitempty"`
 }
 
+// ZoneDelegated ???
 type ZoneDelegated struct {
 	IBBase     `json:"-"`
 	Ref        string       `json:"_ref,omitempty"`
@@ -491,6 +542,7 @@ type ZoneDelegated struct {
 	Ea         EA           `json:"extattrs,omitempty"`
 }
 
+// NewZoneDelegated ???
 func NewZoneDelegated(za ZoneDelegated) *ZoneDelegated {
 	res := za
 	res.objectType = "zone_delegated"
@@ -499,6 +551,7 @@ func NewZoneDelegated(za ZoneDelegated) *ZoneDelegated {
 	return &res
 }
 
+// MarshalJSON ???
 func (ea EA) MarshalJSON() ([]byte, error) {
 	m := make(map[string]interface{})
 	for k, v := range ea {
@@ -510,6 +563,7 @@ func (ea EA) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+// MarshalJSON ???
 func (eas EASearch) MarshalJSON() ([]byte, error) {
 	m := make(map[string]interface{})
 	for k, v := range eas {
@@ -519,6 +573,7 @@ func (eas EASearch) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+// MarshalJSON ???
 func (v EADefListValue) MarshalJSON() ([]byte, error) {
 	m := make(map[string]string)
 	m["value"] = string(v)
@@ -526,6 +581,7 @@ func (v EADefListValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+// MarshalJSON ???
 func (b Bool) MarshalJSON() ([]byte, error) {
 	if b {
 		return json.Marshal("True")
@@ -534,6 +590,7 @@ func (b Bool) MarshalJSON() ([]byte, error) {
 	return json.Marshal("False")
 }
 
+// UnmarshalJSON ???
 func (ea *EA) UnmarshalJSON(b []byte) (err error) {
 	var m map[string]map[string]interface{}
 
@@ -575,6 +632,7 @@ func (ea *EA) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
+// UnmarshalJSON ???
 func (v *EADefListValue) UnmarshalJSON(b []byte) (err error) {
 	var m map[string]string
 	err = json.Unmarshal(b, &m)
@@ -586,6 +644,7 @@ func (v *EADefListValue) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
+// RequestBody ???
 type RequestBody struct {
 	Data               map[string]interface{} `json:"data,omitempty"`
 	Args               map[string]string      `json:"args,omitempty"`
@@ -596,26 +655,31 @@ type RequestBody struct {
 	Discard            bool                   `json:"discard,omitempty"`
 }
 
+// SingleRequest ???
 type SingleRequest struct {
 	IBBase `json:"-"`
 	Body   *RequestBody
 }
 
+// MultiRequest ???
 type MultiRequest struct {
 	IBBase `json:"-"`
 	Body   []*RequestBody
 }
 
+// MarshalJSON ???
 func (r *MultiRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.Body)
 }
 
+// NewMultiRequest ???
 func NewMultiRequest(body []*RequestBody) *MultiRequest {
 	req := &MultiRequest{Body: body}
 	req.objectType = "request"
 	return req
 }
 
+// NewRequest ???
 func NewRequest(body *RequestBody) *SingleRequest {
 	req := &SingleRequest{Body: body}
 	req.objectType = "request"
