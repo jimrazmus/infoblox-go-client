@@ -32,7 +32,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 
 	req := NewMultiRequest(
 		[]*RequestBody{
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "networkview",
 				Data: map[string]interface{}{
@@ -47,7 +47,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 				},
 				Discard: true,
 			},
-			&RequestBody{
+			{
 				Method: "PUT",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Data: map[string]interface{}{
@@ -63,7 +63,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Args: map[string]string{
@@ -75,7 +75,7 @@ func (l *NetworkViewLock) createLockRequest() *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "STATE:DISPLAY",
 			},
 		},
@@ -93,7 +93,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 
 	req := NewMultiRequest(
 		[]*RequestBody{
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "networkview",
 				Data:   getData,
@@ -105,7 +105,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				},
 				Discard: true,
 			},
-			&RequestBody{
+			{
 				Method: "PUT",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Data: map[string]interface{}{
@@ -118,7 +118,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "PUT",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Data: map[string]interface{}{
@@ -129,7 +129,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "GET",
 				Object: "##STATE:NET_VIEW_REF:##",
 				Args: map[string]string{
@@ -141,7 +141,7 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 				EnableSubstitution: true,
 				Discard:            true,
 			},
-			&RequestBody{
+			{
 				Method: "STATE:DISPLAY",
 			},
 		},
