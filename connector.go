@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -47,7 +46,7 @@ func NewTransportConfig(sslVerify string, httpRequestTimeout int, httpPoolConnec
 		caPool := x509.NewCertPool()
 		cert, err := ioutil.ReadFile(sslVerify)
 		if err != nil {
-			log.Printf("Cannot load certificate file '%s'", sslVerify)
+			// log.Printf("Cannot load certificate file '%s'", sslVerify)
 			return
 		}
 		if !caPool.AppendCertsFromPEM(cert) {
@@ -138,7 +137,7 @@ func getHTTPResponseError(resp *http.Response) error {
 	defer resp.Body.Close()
 	content, _ := ioutil.ReadAll(resp.Body)
 	msg := fmt.Sprintf("WAPI request error: %d('%s')\nContents:\n%s\n", resp.StatusCode, resp.Status, content)
-	log.Print(msg)
+	// log.Print(msg)
 	return errors.New(msg)
 }
 
@@ -154,7 +153,7 @@ func (whr *WapiHTTPRequestor) Init(cfg TransportConfig) {
 	// All users of cookiejar should import "golang.org/x/net/publicsuffix"
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
-		log.Fatal(err)
+		panic(err) // XXX Fix this!
 	}
 
 	whr.client = http.Client{Jar: jar, Transport: tr, Timeout: cfg.HTTPRequestTimeout * time.Second}
@@ -175,7 +174,7 @@ func (whr *WapiHTTPRequestor) SendRequest(req *http.Request) (res []byte, err er
 	defer resp.Body.Close()
 	res, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Http Reponse ioutil.ReadAll() Error: '%s'", err)
+		// log.Printf("Http Reponse ioutil.ReadAll() Error: '%s'", err)
 		return
 	}
 
@@ -227,7 +226,7 @@ func (wrb *WapiRequestBuilder) BuildBody(t RequestType, obj IBObject) []byte {
 
 	objJSON, err = json.Marshal(obj)
 	if err != nil {
-		log.Printf("Cannot marshal object '%s': %s", obj, err)
+		// log.Printf("Cannot marshal object '%s': %s", obj, err)
 		return nil
 	}
 
@@ -235,7 +234,7 @@ func (wrb *WapiRequestBuilder) BuildBody(t RequestType, obj IBObject) []byte {
 	if t == GET && len(eaSearch) > 0 {
 		eaSearchJSON, err := json.Marshal(eaSearch)
 		if err != nil {
-			log.Printf("Cannot marshal EA Search attributes. '%s'\n", err)
+			// log.Printf("Cannot marshal EA Search attributes. '%s'\n", err)
 			return nil
 		}
 		objJSON = append(append(objJSON[:len(objJSON)-1], byte(',')), eaSearchJSON[1:]...)
@@ -263,7 +262,7 @@ func (wrb *WapiRequestBuilder) BuildRequest(t RequestType, obj IBObject, ref str
 
 	req, err = http.NewRequest(t.toMethod(), urlStr, bytes.NewBuffer(bodyStr))
 	if err != nil {
-		log.Printf("err1: '%s'", err)
+		// log.Printf("err1: '%s'", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -298,13 +297,13 @@ func (c *Connector) CreateObject(obj IBObject) (ref string, err error) {
 	queryParams := QueryParams{forceProxy: false}
 	resp, err := c.makeRequest(CREATE, obj, "", queryParams)
 	if err != nil || len(resp) == 0 {
-		log.Printf("CreateObject request error: '%s'\n", err)
+		// log.Printf("CreateObject request error: '%s'\n", err)
 		return
 	}
 
 	err = json.Unmarshal(resp, &ref)
 	if err != nil {
-		log.Printf("Cannot unmarshall '%s', err: '%s'\n", string(resp), err)
+		// log.Printf("Cannot unmarshall '%s', err: '%s'\n", string(resp), err)
 		return
 	}
 
@@ -322,7 +321,8 @@ func (c *Connector) GetObject(obj IBObject, ref string, res interface{}) (err er
 	var result interface{}
 	err = json.Unmarshal(resp, &result)
 	if err != nil {
-		log.Printf("Cannot unmarshall to check empty value '%s', err: '%s'\n", string(resp), err)
+		// log.Printf("Cannot unmarshall to check empty value '%s', err: '%s'\n", string(resp), err)
+		return
 	}
 
 	var data []interface{}
@@ -331,14 +331,15 @@ func (c *Connector) GetObject(obj IBObject, ref string, res interface{}) (err er
 		resp, err = c.makeRequest(GET, obj, ref, queryParams)
 	}
 	if err != nil {
-		log.Printf("GetObject request error: '%s'\n", err)
+		// log.Printf("GetObject request error: '%s'\n", err)
+		return
 	}
 	if len(resp) == 0 {
 		return
 	}
 	err = json.Unmarshal(resp, res)
 	if err != nil {
-		log.Printf("Cannot unmarshall '%s', err: '%s'\n", string(resp), err)
+		// log.Printf("Cannot unmarshall '%s', err: '%s'\n", string(resp), err)
 		return
 	}
 	return
@@ -350,13 +351,13 @@ func (c *Connector) DeleteObject(ref string) (refRes string, err error) {
 	queryParams := QueryParams{forceProxy: false}
 	resp, err := c.makeRequest(DELETE, nil, ref, queryParams)
 	if err != nil {
-		log.Printf("DeleteObject request error: '%s'\n", err)
+		// log.Printf("DeleteObject request error: '%s'\n", err)
 		return
 	}
 
 	err = json.Unmarshal(resp, &refRes)
 	if err != nil {
-		log.Printf("Cannot unmarshall '%s', err: '%s'\n", string(resp), err)
+		// log.Printf("Cannot unmarshall '%s', err: '%s'\n", string(resp), err)
 		return
 	}
 
@@ -369,13 +370,13 @@ func (c *Connector) UpdateObject(obj IBObject, ref string) (refRes string, err e
 	refRes = ""
 	resp, err := c.makeRequest(UPDATE, obj, ref, queryParams)
 	if err != nil {
-		log.Printf("Failed to update object %s: %s", obj.ObjectType(), err)
+		// log.Printf("Failed to update object %s: %s", obj.ObjectType(), err)
 		return
 	}
 
 	err = json.Unmarshal(resp, &refRes)
 	if err != nil {
-		log.Printf("Cannot unmarshall update object response'%s', err: '%s'\n", string(resp), err)
+		// log.Printf("Cannot unmarshall update object response'%s', err: '%s'\n", string(resp), err)
 		return
 	}
 	return
@@ -387,9 +388,9 @@ func (c *Connector) UpdateObject(obj IBObject, ref string) (refRes string, err e
 func (c *Connector) Logout() (err error) {
 	queryParams := QueryParams{forceProxy: false}
 	_, err = c.makeRequest(CREATE, nil, "logout", queryParams)
-	if err != nil {
-		log.Printf("Logout request error: '%s'\n", err)
-	}
+	// if err != nil {
+	// 	log.Printf("Logout request error: '%s'\n", err)
+	// }
 
 	return
 }
@@ -402,9 +403,9 @@ func validateConnector(c *Connector) (err error) {
 	var response []UserProfile
 	userprofile := NewUserProfile(UserProfile{})
 	err = c.GetObject(userprofile, "", &response)
-	if err != nil {
-		log.Printf("Failed to connect to the Grid, err: %s \n", err)
-	}
+	// if err != nil {
+	// 	log.Printf("Failed to connect to the Grid, err: %s \n", err)
+	// }
 	return
 }
 

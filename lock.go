@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -151,23 +149,23 @@ func (l *NetworkViewLock) createUnlockRequest(force bool) *MultiRequest {
 }
 
 func (l *NetworkViewLock) getLock() bool {
-	logrus.Debugf("Creating lock on network niew %s\n", l.Name)
+	// logrus.Debugf("Creating lock on network niew %s\n", l.Name)
 	req := l.createLockRequest()
 	res, err := l.ObjMgr.CreateMultiObject(req)
 
 	if err != nil {
-		logrus.Debugf("Failed to create lock on network view %s: %s\n", l.Name, err)
+		// logrus.Debugf("Failed to create lock on network view %s: %s\n", l.Name, err)
 
 		//Check for Lock Timeout
 		nw, err := l.ObjMgr.GetNetworkView(l.Name)
 		if err != nil {
-			logrus.Debugf("Failed to get the network view object for %s : %s\n", l.Name, err)
+			// logrus.Debugf("Failed to get the network view object for %s : %s\n", l.Name, err)
 			return false
 		}
 
 		if t, ok := nw.Ea[l.LockTimeoutEA]; ok {
 			if int32(time.Now().Unix())-int32(t.(int)) > timeout {
-				logrus.Debugln("Lock is timed out. Forcefully acquiring it.")
+				// logrus.Debugln("Lock is timed out. Forcefully acquiring it.")
 				//remove the lock forcefully, ignoring errors, and acquire it
 				_ = l.UnLock(true)
 				// try to get lock again
@@ -179,7 +177,7 @@ func (l *NetworkViewLock) getLock() bool {
 
 	dockerID := res[0]["DOCKER-ID"]
 	if dockerID == l.ObjMgr.tenantID {
-		logrus.Debugln("Got the lock !!!")
+		// logrus.Debugln("Got the lock !!!")
 		return true
 	}
 
@@ -194,7 +192,7 @@ func (l *NetworkViewLock) Lock() error {
 	nw, err := l.ObjMgr.GetNetworkView(l.Name)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to get the network view object for %s : %s\n", l.Name, err)
-		logrus.Debugf(msg)
+		// logrus.Debugf(msg)
 		return fmt.Errorf(msg)
 	}
 
@@ -211,7 +209,7 @@ func (l *NetworkViewLock) Lock() error {
 		lock := l.getLock()
 		if lock {
 			// Got the lock.
-			logrus.Debugf("Got the lock on Network View %s\n", l.Name)
+			// logrus.Debugf("Got the lock on Network View %s\n", l.Name)
 			return nil
 		}
 
@@ -221,7 +219,7 @@ func (l *NetworkViewLock) Lock() error {
 		}
 
 		retryCount++
-		logrus.Debugf("Lock on Network View %s not free. Retrying again %d out of 10.\n", l.Name, retryCount)
+		// logrus.Debugf("Lock on Network View %s not free. Retrying again %d out of 10.\n", l.Name, retryCount)
 		// sleep for random time (between 1 - 10 seconds) to reduce collisions
 		time.Sleep(time.Duration(rand.Intn(9)+1) * time.Second)
 		continue
@@ -237,17 +235,17 @@ func (l *NetworkViewLock) UnLock(force bool) error {
 
 	if err != nil {
 		msg := fmt.Sprintf("Failed to release lock from Network View %s: %s\n", l.Name, err)
-		logrus.Errorf(msg)
+		// logrus.Errorf(msg)
 		return fmt.Errorf(msg)
 	}
 
 	dockerID := res[0]["DOCKER-ID"]
 	if dockerID == freeLockVal {
-		logrus.Debugln("Removed the lock!")
+		// logrus.Debugln("Removed the lock!")
 		return nil
 	}
 
 	msg := fmt.Sprintf("Failed to release lock from Network View %s\n", l.Name)
-	logrus.Errorf(msg)
+	// logrus.Errorf(msg)
 	return fmt.Errorf(msg)
 }
