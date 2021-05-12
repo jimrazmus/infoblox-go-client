@@ -20,7 +20,7 @@ jobs:
         run: go fmt .
 
       - name: Lint & Errcheck
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v2.5.2
         with:
           skip-go-installation: true
 
